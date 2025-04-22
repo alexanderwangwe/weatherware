@@ -2,32 +2,91 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTOs\{CurrentWeatherDTO, ForecastDTO};
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use App\Http\Requests\WeatherRequest;
+use App\Services\WeatherService;
+use App\Transformers\WeatherTransformer;
+use Illuminate\Http\JsonResponse;
 
 class WeatherController extends Controller
 {
-    public function getWeather(Request $request)
+    /**
+     * @var WeatherService
+     */
+    private WeatherService $weatherService;
+
+    /**
+     * Constructor
+     *
+     * @param WeatherService $weatherService
+     */
+    public function __construct(WeatherService $weatherService)
     {
-        $city = $request->query('city', 'Nairobi');
+        $this->weatherService = $weatherService;
+    }
 
-        $response = Http::get('https://api.openweathermap.org/data/2.5/weather', [
-            'q' => $city,
-            'appid' => env('OPENWEATHER_API_KEY'),
-            'units' => 'metric',
-        ]);
+    /**
+     * Get current weather for a city
+     *
+     * @param WeatherRequest $request
+     * @return JsonResponse
+     */
+    public function getWeather(WeatherRequest $request): JsonResponse
+    {
+        $city = $request->input('city');
+        $unit = $request->input('unit', 'metric');
 
-        if ($response->failed()) {
-            return response()->json(['error' => 'Could not fetch weather data'], 500);
+        // Try to geocode the city first
+        $geocode = $this->weatherService->geocodeCity($city);
+        if (!$geocode) {
+            return response()->json([
+                'error' => 'Could not find the specified city'
+            ], 404);
         }
 
-        $data = $response->json();
+        // Get weather data
+        $data = $this->weatherService->getCurrentWeather($city, $unit);
+        if (!$data) {
+            return response()->json([
+                'error' => 'Could not fetch weather data'
+            ], 500);
+        }
 
-        return response()->json([
-            'location' => $data['name'],
-            'temperature' => $data['main']['temp'] . '°C',
-            'description' => $data['weather'][0]['description'],
-        ]);
+        $weatherDTO = WeatherTransformer::toCurrentWeather($data, $unit);
+
+        return response()->json($weatherDTO);
+    }
+
+    /**
+     * Get 3-day forecast for a city
+     *
+     * @param WeatherRequest $request
+     * @return JsonResponse
+     */
+    public function getForecast(WeatherRequest $request): JsonResponse
+    {
+        $city = $request->input('city');
+        $unit = $request->input('unit', 'metric');
+
+        // Try to geocode the city first
+        $geocode = $this->weatherService->geocodeCity($city);
+        if (!$geocode) {
+            return response()->json([
+                'error' => 'Could not find the specified city'
+            ], 404);
+        }
+
+        // Get forecast data
+        $data = $this->weatherService->getForecast($city, $unit);
+        if (!$data) {
+            return response()->json([
+                'error' => 'Could not fetch forecast data'
+            ], 500);
+        }
+
+        $forecastDTO = WeatherTransformer::toForecast($data, $unit);
+
+        return response()->json($forecastDTO);
     }
 }
