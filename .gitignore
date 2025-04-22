@@ -1,0 +1,14 @@
+# Node modules
+frontend/node_modules/
+
+# Laravel
+backend/vendor/
+backend/storage/*.key
+backend/.env
+
+# Next.js
+frontend/.next/
+
+# OS files
+.DS_Store
+Thumbs.db
