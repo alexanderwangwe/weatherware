@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Http;
 
 class WeatherController extends Controller
 {
-    public function fetch(Request $request)
+    public function getWeather(Request $request)
     {
-        $city = $request->query('city', 'Nairobi'); 
+        $city = $request->query('city', 'Nairobi');
 
         $response = Http::get('https://api.openweathermap.org/data/2.5/weather', [
             'q' => $city,
