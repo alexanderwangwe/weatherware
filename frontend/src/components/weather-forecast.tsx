@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Cloud, Sun } from "lucide-react";
 
 interface WeatherForecastProps {
   city: string;
@@ -20,7 +19,7 @@ export default function WeatherForecast({ city, unit }: WeatherForecastProps) {
 
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/forecast?city=${city}&unit=metric`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/forecast?city=${city}&unit=${unit}`
         );
         if (!res.ok) {
           const errorBody = await res.text();
@@ -29,14 +28,17 @@ export default function WeatherForecast({ city, unit }: WeatherForecastProps) {
         }
 
         const json = await res.json();
-        console.log("Forecast data:", json);
+        console.log("Fetched forecast data:", json);
 
-        // Update the forecast state with the fetched data
         setForecast(
-          json.forecast.map((day: any) => ({
-            date: day.date,
-            icon: day.weather.icon, // Adjust based on backend response
-            temperature: day.temperature,
+          json.forecast.map((item: any) => ({
+            day: new Date(item.date).toLocaleDateString("en-US", {
+              weekday: "long",
+            }),
+            min: item.temperature.min,
+            max: item.temperature.max,
+            feels_like: item.temperature.feels_like,
+            unit: item.temperature.unit,
           }))
         );
       } catch (err: any) {
@@ -48,29 +50,33 @@ export default function WeatherForecast({ city, unit }: WeatherForecastProps) {
     };
 
     fetchForecast();
-  }, [city]);
+  }, [city, unit]); // Re-fetch when `city` or `unit` changes
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
   if (!forecast.length) return null;
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {forecast.map((day, index) => (
         <div
           key={index}
-          className="flex flex-col items-center rounded-lg border border-gray-200 p-4 text-center"
+          className="flex flex-col items-center rounded-lg border border-gray-300 bg-gray-50 p-6 shadow-md hover:shadow-lg transition-shadow"
         >
-          <div className="mb-2 text-sm font-medium">{day.date}</div>
-          <div className="mb-2 text-3xl">
-            {day.icon === "sunny" ? (
-              <Sun className="mx-auto h-10 w-10 text-yellow-400" />
-            ) : (
-              <Cloud className="mx-auto h-10 w-10 text-gray-400" />
-            )}
+          <div className="mb-4 text-lg font-semibold text-gray-700">
+            {day.day}
           </div>
-          <div className="text-xs text-gray-600">
-            {day.temperature}°{unit === "metric" ? "C" : "F"}
+          <div className="mb-4 text-4xl font-bold text-gray-800">
+            {day.min}
+            {day.unit} - {day.max}
+            {day.unit}
+          </div>
+          <div className="text-sm text-gray-600">
+            Feels like:{" "}
+            <span className="font-medium">
+              {day.feels_like}
+              {day.unit}
+            </span>
           </div>
         </div>
       ))}
