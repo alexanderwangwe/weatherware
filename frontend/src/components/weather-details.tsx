@@ -1,34 +1,70 @@
-import { RotateCw } from "lucide-react"
+"use client";
+
+import { useEffect, useState } from "react";
 
 interface WeatherDetailsProps {
-  title: string
-  value: string
-  icon: string
-  showProgressBar?: boolean
+  city: string;
 }
 
-export default function WeatherDetails({ title, value, icon, showProgressBar = false }: WeatherDetailsProps) {
+interface WeatherData {
+  humidity: string;
+  windSpeed: number;
+  windDirection: number;
+}
+
+export default function WeatherDetails({ city }: WeatherDetailsProps) {
+  const [data, setData] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!city) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/weather?city=${city}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch weather details");
+
+        const json = await res.json();
+
+        setData({
+          humidity: json.weather.humidity,
+          windSpeed: json.weather.wind.speed,
+          windDirection: json.weather.wind.direction,
+        });
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [city]);
+
+  if (loading) return <div>Loading weather details...</div>;
+  if (error) return <div className="text-red-500">Error: {error}</div>;
+  if (!data) return null;
+
   return (
-    <div className="rounded-lg border border-gray-200 p-4">
-      <div className="mb-4 text-center text-sm text-gray-500">{title}</div>
-      <div className="mb-4 text-center text-4xl font-bold">{value}</div>
-
-      {icon === "wind" && (
-        <div className="flex items-center justify-center">
-          <div className="rounded-full border border-gray-200 p-2">
-            <RotateCw className="h-4 w-4 text-gray-400" />
-          </div>
-          <span className="ml-2 text-xs text-gray-500">WSW</span>
-        </div>
-      )}
-
-      {showProgressBar && (
-        <div className="mt-4">
-          <div className="relative h-2 w-full rounded-full bg-gray-200">
-            <div className="absolute left-0 top-0 h-2 rounded-full bg-gray-400" style={{ width: "80%" }}></div>
-          </div>
-        </div>
-      )}
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <DetailBox title="Humidity" value={data.humidity} />
+      <DetailBox title="Wind Speed" value={`${data.windSpeed} m/s`} />
+      <DetailBox title="Wind Direction" value={`${data.windDirection}°`} />
     </div>
-  )
+  );
+}
+
+function DetailBox({ title, value }: { title: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-gray-300 bg-gray-50 p-4 shadow-sm">
+      <div className="text-sm font-semibold text-gray-600">{title}</div>
+      <div className="text-2xl font-bold text-gray-800">{value}</div>
+    </div>
+  );
 }

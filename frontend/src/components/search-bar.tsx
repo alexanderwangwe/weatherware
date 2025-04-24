@@ -10,7 +10,13 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
 
   const handleSearch = () => {
     if (city.trim()) {
-      onSearch(city);
+      onSearch(city.trim());
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
     }
   };
 
@@ -20,8 +26,9 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
         type="text"
         value={city}
         onChange={(e) => setCity(e.target.value)}
-        placeholder="Search city..."
-        className="w-full rounded-md border border-gray-300 py-2 pl-4 pr-10 focus:border-gray-400 focus:outline-none"
+        onKeyDown={handleKeyDown}
+        placeholder="Enter city..."
+        className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-gray-700"
       />
       <button
         onClick={handleSearch}
