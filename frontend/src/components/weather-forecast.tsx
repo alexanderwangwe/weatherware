@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { fetchForecast } from "../utils/api";
 import { Cloud, Sun } from "lucide-react";
 
 interface WeatherForecastProps {
@@ -13,21 +12,43 @@ export default function WeatherForecast({ city, unit }: WeatherForecastProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    if (!city) return;
+
+    const fetchForecast = async () => {
       setLoading(true);
-      setError(null);
+      setError("");
+
       try {
-        const data = await fetchForecast(city, unit); // Fetch data based on props
-        setForecast(data);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/forecast?city=${city}&unit=metric`
+        );
+        if (!res.ok) {
+          const errorBody = await res.text();
+          console.error("Error response:", res.status, errorBody);
+          throw new Error(`Failed to fetch forecast: ${res.status}`);
+        }
+
+        const json = await res.json();
+        console.log("Forecast data:", json);
+
+        // Update the forecast state with the fetched data
+        setForecast(
+          json.forecast.map((day: any) => ({
+            date: day.date,
+            icon: day.weather.icon, // Adjust based on backend response
+            temperature: day.temperature,
+          }))
+        );
       } catch (err: any) {
+        console.error("Fetch error:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [city, unit]); // Refetch data when city or unit changes
+    fetchForecast();
+  }, [city]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
