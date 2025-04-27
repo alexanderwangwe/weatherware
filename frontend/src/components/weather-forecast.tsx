@@ -50,7 +50,7 @@ export default function WeatherForecast({ city, unit }: WeatherForecastProps) {
     };
 
     fetchForecast();
-  }, [city, unit]); // Re-fetch when `city` or `unit` changes
+  }, [city, unit]); // Re-fetch when city or unit changes
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -61,19 +61,27 @@ export default function WeatherForecast({ city, unit }: WeatherForecastProps) {
       {forecast.map((day, index) => (
         <div
           key={index}
-          className="flex flex-col items-center rounded-lg border border-gray-300 bg-gray-50 p-6 shadow-md hover:shadow-lg transition-shadow"
+          className="flex flex-col items-center rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow duration-300"
         >
-          <div className="mb-4 text-lg font-semibold text-gray-700">
-            {day.day}
+          {/* Day */}
+          <div className="mb-2 text-sm font-medium text-primary">{day.day}</div>
+
+          {/* Temperatures */}
+          <div className="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-700">
+            <span>
+              {day.min}
+              {day.unit}
+            </span>
+            <span className="text-gray-400">—</span>
+            <span>
+              {day.max}
+              {day.unit}
+            </span>
           </div>
-          <div className="mb-4 text-4xl font-bold text-gray-800">
-            {day.min}
-            {day.unit} - {day.max}
-            {day.unit}
-          </div>
-          <div className="text-sm text-gray-600">
+          {/* Feels like */}
+          <div className="text-sm text-gray-500">
             Feels like:{" "}
-            <span className="font-medium">
+            <span className="font-semibold text-gray-700">
               {day.feels_like}
               {day.unit}
             </span>

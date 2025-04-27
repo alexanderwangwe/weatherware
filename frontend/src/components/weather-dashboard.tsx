@@ -15,7 +15,7 @@ export default function WeatherDashboard() {
     setCity(newCity);
   };
 
-  // Handle unit toggle (e.g., metric or imperial)
+  // Handle unit toggle
   const handleUnitToggle = (newUnit: "metric" | "imperial") => {
     setUnit(newUnit);
   };
@@ -23,8 +23,9 @@ export default function WeatherDashboard() {
   return (
     <div className="w-full max-w-5xl rounded-lg bg-white p-6 shadow-lg">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left Column - Current Weather */}
+        {/* Left Column */}
         <div className="flex flex-col items-center justify-center space-y-4 border-b pb-6 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
+          <h2 className="text-xl font-bold text-gray-800">Current Weather</h2>
           <CurrentWeather city={city} unit={unit} />
         </div>
 
@@ -37,11 +38,19 @@ export default function WeatherDashboard() {
 
           {/* Weather Forecast */}
           <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Weather Forecast
+            </h2>
             <WeatherForecast city={city} unit={unit} />
           </div>
 
           {/* Weather Details */}
-          <WeatherDetails city={city} />
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Weather Details
+            </h2>
+            <WeatherDetails city={city} />
+          </div>
         </div>
       </div>
     </div>

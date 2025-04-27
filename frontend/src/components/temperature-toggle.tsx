@@ -11,7 +11,7 @@ export default function TemperatureToggle({
 
   const handleToggle = (unit: "metric" | "imperial") => {
     setActiveUnit(unit);
-    onToggle(unit); // Notify parent component
+    onToggle(unit); 
   };
 
   return (
