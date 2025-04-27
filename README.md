@@ -1,8 +1,8 @@
 # WeatherWare
 
-This is my submission for PawaIT's Software Engineering assessment.
+This is my submission for Pawa IT_Software Engineering assessment.
 
-A responsive and user-friendly weather app built using decoupled architecture using NextJS, TypeScript, and Tailwind CSS with a Laravel backend. The app fetches real-time weather data and displays current conditions, a 3-day forecast, and detailed weather information for any city.
+A responsive and user-friendly weather app built in a decoupled architecture using NextJS, TypeScript, and Tailwind CSS with a Laravel backend. The app fetches real-time weather data and displays current conditions, a 3-day forecast, and detailed weather information for any city.
 
 ---
 
